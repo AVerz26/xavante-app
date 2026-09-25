@@ -1,12 +1,16 @@
 // soundEngine.js - 100% Offline Audio & Voice Engine
-// Suporta reprodução de arquivos MP3 reais, Síntese de Voz Humana (Web Speech API)
-// e Efeitos Sonoros gamificados (Web Audio API)
+// Suporta reprodução nativa via Capacitor TextToSpeech (Android / iOS APK),
+// Web Speech API (Navegadores Chrome/Edge/Safari) e Síntese Procedural Web Audio API
+
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Capacitor } from '@capacitor/core';
 
 class SoundEngine {
   constructor() {
     this.ctx = null;
     this.muted = localStorage.getItem('xavante_sound_muted') === 'true';
     this.cachedVoices = [];
+    this.currentUtterance = null;
     this.initVoices();
   }
 
@@ -18,16 +22,20 @@ class SoundEngine {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 
   initVoices() {
-    if ('speechSynthesis' in window) {
-      this.cachedVoices = window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
         this.cachedVoices = window.speechSynthesis.getVoices();
-      };
+        window.speechSynthesis.onvoiceschanged = () => {
+          this.cachedVoices = window.speechSynthesis.getVoices();
+        };
+      } catch (e) {
+        // Ignora erros em WebViews restritas
+      }
     }
   }
 
@@ -42,69 +50,90 @@ class SoundEngine {
   }
 
   // --- REPRODUÇÃO DE VOZ HUMANA / PRONÚNCIA ---
-  // Tenta reproduzir arquivo de áudio real (.mp3); caso não exista, usa síntese de voz (TTS) adaptada
+  // Funciona no Android APK (Capacitor nativo) e no Navegador Web
   async playWord(wordId, wordText, ttsHint = '', slow = false) {
     if (this.muted) return;
+    this.init();
 
-    // 1. Tenta carregar arquivo de áudio real em public/audio/{wordId}.mp3
-    try {
-      const audioUrl = `/audio/${wordId}.mp3`;
-      const testAudio = new Audio(audioUrl);
-      testAudio.playbackRate = slow ? 0.75 : 1.0;
-      
-      const playPromise = testAudio.play();
-      if (playPromise !== undefined) {
-        await playPromise;
-        return; // Reproduziu áudio gravado com sucesso!
-      }
-    } catch (e) {
-      // Se não houver arquivo MP3, prossegue para síntese de voz humana
-    }
+    // Tratamento fonético cuidadoso para aproximar ao máximo da pronúncia A'uwẽ Xavante:
+    let textToSpeak = (ttsHint || wordText || '').trim();
 
-    // 2. Síntese de Voz Humana Nativa (Web Speech API) - Funciona 100% Offline
-    this.speakWord(wordText, ttsHint, slow);
-  }
-
-  speakWord(wordText, ttsHint = '', slow = false) {
-    if (this.muted) return;
-    if (!('speechSynthesis' in window)) {
-      this.playPhoneticVoice(2, 320); // Fallback sintetizador
-      return;
-    }
-
-    // Cancela falas anteriores para resposta imediata
-    window.speechSynthesis.cancel();
-
-    // Se houver texto adaptado para fonética Xavante, usa ele; senão adapta o texto original
-    let textToSpeak = ttsHint || wordText;
-    
-    // Tratamento fonético para motores de fala em Português:
-    // - O apóstrofo (saltillo / parada glotal) vira pausa curta
+    // 1. O apóstrofo (') indica parada glotal (saltillo) -> pausa com vírgula e espaço
     textToSpeak = textToSpeak.replace(/(\w+)'(\w+)/g, '$1, $2');
-    // - O 'ö' central fecha em som de 'õ' ou 'e'
+    textToSpeak = textToSpeak.replace(/'/g, ' ');
+    // 2. O 'ö' central no Xavante fecha em som similar a 'õ' ou 'e'
     textToSpeak = textToSpeak.replace(/ö/gi, 'õ');
-    // - Limpa pontuações de pergunta no meio
+    // 3. Remove interrogações isoladas
     textToSpeak = textToSpeak.replace(/\?/g, '');
+    if (!textToSpeak.trim()) textToSpeak = wordText;
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak.trim());
-    utterance.lang = 'pt-BR';
-    utterance.rate = slow ? 0.65 : 0.85; // Velocidade ideal para aprendizagem
-    utterance.pitch = 1.05;
-
-    // Seleciona a melhor voz disponível em português
-    if (this.cachedVoices.length === 0 && 'speechSynthesis' in window) {
-      this.cachedVoices = window.speechSynthesis.getVoices();
+    // TIER 1: Native Text-To-Speech (Capacitor Android / iOS)
+    // No Android APK, o WebView não possui speechSynthesis, logo o plugin nativo fala diretamente via Android OS!
+    if (Capacitor.isNativePlatform() || Capacitor.isPluginAvailable('TextToSpeech')) {
+      try {
+        await TextToSpeech.stop().catch(() => {});
+        await TextToSpeech.speak({
+          text: textToSpeak,
+          lang: 'pt-BR',
+          rate: slow ? 0.65 : 0.85,
+          pitch: 1.0,
+          volume: 1.0,
+          category: 'ambient',
+        });
+        return;
+      } catch (nativeErr) {
+        console.warn('Native TextToSpeech falhou, tentando fallback:', nativeErr);
+      }
     }
 
-    const ptVoice = this.cachedVoices.find(v => 
-      (v.lang === 'pt-BR' || v.lang.startsWith('pt')) && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Luciana') || v.name.includes('Maria'))
-    ) || this.cachedVoices.find(v => v.lang === 'pt-BR' || v.lang.startsWith('pt'));
+    // TIER 2: Web Speech API (Navegadores Chrome, Edge, Safari no PC ou Celular)
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        // Tratamento para evitar o bug de cancelamento do Chromium
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
 
-    if (ptVoice) {
-      utterance.voice = ptVoice;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'pt-BR';
+        utterance.rate = slow ? 0.70 : 0.88;
+        utterance.pitch = 1.02;
+        utterance.volume = 1.0;
+
+        // Mantém referência viva para evitar garbage collector do Chrome interromper a fala
+        this.currentUtterance = utterance;
+
+        if (this.cachedVoices.length === 0) {
+          this.cachedVoices = window.speechSynthesis.getVoices();
+        }
+
+        const ptVoice = this.cachedVoices.find(v => 
+          (v.lang === 'pt-BR' || v.lang.startsWith('pt')) && 
+          (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Luciana') || v.name.includes('Maria'))
+        ) || this.cachedVoices.find(v => v.lang === 'pt-BR' || v.lang.startsWith('pt'));
+
+        if (ptVoice) {
+          utterance.voice = ptVoice;
+        }
+
+        utterance.onend = () => { this.currentUtterance = null; };
+        utterance.onerror = () => { this.currentUtterance = null; };
+
+        setTimeout(() => {
+          try {
+            window.speechSynthesis.speak(utterance);
+          } catch (e) {
+            this.playPhoneticVoice(2, 320);
+          }
+        }, 50);
+        return;
+      } catch (webErr) {
+        console.warn('Web Speech falhou, tentando síntese procedural:', webErr);
+      }
     }
 
-    window.speechSynthesis.speak(utterance);
+    // TIER 3: Síntese Procedural de Sílabas via Web Audio API (Fallback 100% offline)
+    this.playPhoneticVoice(2, 320);
   }
 
   // --- EFEITOS SONOROS GAMIFICADOS (WEB AUDIO API) ---

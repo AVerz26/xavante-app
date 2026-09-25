@@ -86,6 +86,11 @@ function initApp() {
   renderTopStats();
   renderTrail();
 
+  // Desbloqueia AudioContext no primeiro toque (exigência de navegadores e WebViews mobile)
+  document.addEventListener('pointerdown', () => {
+    sounds.init();
+  }, { once: true });
+
   // Register PWA Service Worker (Offline Support)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -424,11 +429,14 @@ function setupPractice() {
 
 // --- VIEW 4: PERFIL & CONQUISTAS ---
 function setupProfile() {
-  el.btnToggleSound.addEventListener('click', () => {
-    const muted = sounds.toggleMute();
-    el.btnToggleSound.textContent = muted ? '🔇 Som: Silenciado' : '🔊 Som: Ligado';
-    sounds.playTap();
-  });
+  if (el.btnToggleSound) {
+    el.btnToggleSound.textContent = sounds.isMuted() ? '🔇 Som: Silenciado' : '🔊 Som: Ligado';
+    el.btnToggleSound.addEventListener('click', () => {
+      const muted = sounds.toggleMute();
+      el.btnToggleSound.textContent = muted ? '🔇 Som: Silenciado' : '🔊 Som: Ligado';
+      sounds.playTap();
+    });
+  }
 
   el.btnResetData.addEventListener('click', () => {
     if (confirm('Deseja realmente reiniciar todo o progresso do aprendizado?')) {
@@ -443,6 +451,9 @@ function setupProfile() {
 
 function renderProfile() {
   const state = appState.get();
+  if (el.btnToggleSound) {
+    el.btnToggleSound.textContent = sounds.isMuted() ? '🔇 Som: Silenciado' : '🔊 Som: Ligado';
+  }
   el.profileXp.textContent = state.xp;
   el.profileStreak.textContent = state.streak;
 
