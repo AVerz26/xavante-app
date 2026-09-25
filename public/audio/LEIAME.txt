@@ -1,0 +1,47 @@
+COMO ADICIONAR ÁUDIOS GRAVADOS REAIS (MP3) AO APLICATIVO
+============================================================
+
+O aplicativo "Aprenda Xavante" possui um sistema de som duplo:
+1. Ele já fala automaticamente com a voz humana (Síntese de Voz Offline / TTS).
+2. Se você ou um falante nativo da língua Xavante gravar áudios em MP3, basta colocar os arquivos nesta pasta (public/audio/) com os nomes listados abaixo!
+
+Quando o arquivo MP3 estiver presente aqui, o aplicativo tocará a gravação autêntica da voz humana automaticamente!
+
+LISTA DE ARQUIVOS SUPORTADOS:
+-----------------------------
+- to_ba.mp3        -> "Tô ba?" (Tudo bem? / Como vai?)
+- to_uptabi.mp3    -> "Tô uptabi" (Muito bem! / Tudo ótimo!)
+- mo.mp3           -> "Mo" (Ir / Vamos!)
+- mori_waaba.mp3   -> "Morĩ wa'aba" (Vão em paz!)
+- datsaa.mp3       -> "Datsa'a" (Obrigado / Gratidão)
+- auwe.mp3         -> "A'uwẽ" (Pessoa / Povo Xavante)
+- aibo.mp3         -> "Aibö" (Homem)
+- pio.mp3          -> "Pi'õ" (Mulher)
+- baoto.mp3        -> "Ba'õtõ" (Criança / Menino)
+- i_mama.mp3       -> "I-mama" (Meu pai)
+- i_no.mp3         -> "I-no" (Minha mãe)
+- waradzu.mp3      -> "Waradzu" (O não-indígena)
+- ha.mp3           -> "Hã" (Terra / Chão)
+- bo.mp3           -> "Bö" (Cerrado / Mata)
+- o.mp3            -> "Ö" (Água)
+- owawe.mp3        -> "Öwawe" (Rio grande)
+- poo.mp3          -> "Po'o" (Fogo)
+- ri.mp3           -> "Ri" (Casa tradicional)
+- wahu.mp3         -> "Wahu" (Sol / Ano)
+- aamo.mp3         -> "A'amo" (Lua)
+- tsere.mp3        -> "Tsere" (Pássaro / Gavião)
+- romho.mp3        -> "Romhö" (Onça-pintada)
+- wahi.mp3         -> "Wahi" (Cobra)
+- hori.mp3         -> "Höri" (Peixe)
+- pore.mp3         -> "Po're" (Anta)
+- aba.mp3          -> "Aba" (Veado)
+- tsa.mp3          -> "Tsa" (Comer)
+- ori.mp3          -> "Öri" (Beber)
+- wapari.mp3       -> "Wapari" (Ouvir / Escutar)
+- aina.mp3         -> "Aina" (Ver / Olhar)
+- misi.mp3         -> "Misi" (Um)
+- maptutu.mp3      -> "Maptutu" (Dois)
+- siubdato.mp3     -> "Si'ubdató" (Três)
+- aho.mp3          -> "Ahö" (Muitos)
+
+Todos os arquivos colocados aqui serão automaticamente embutidos no APK quando você compilar o aplicativo para o celular!

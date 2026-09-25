@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#D9381E" />
+    <meta name="description" content="Aprenda palavras, frases e a rica cultura da língua indígena Xavante (A'uwẽ Mreme) de forma interativa e 100% offline." />
+    <title>A'uwẽ - Aprenda Xavante</title>
+    
+    <!-- Google Fonts: Fredoka & Nunito (Duolingo visual aesthetics) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/jpeg" href="/assets/icon.jpg" />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <!-- Mobile App Container -->
+    <div id="app-viewport">
+      
+      <!-- Top Gamified Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <div class="app-brand-badge" id="brand-badge">
+            <img src="/assets/icon.jpg" alt="A'uwẽ Xavante" class="app-brand-icon" />
+            <span>A'uwẽ Mreme</span>
+          </div>
+        </div>
+
+        <div class="top-bar-stats">
+          <!-- Streak -->
+          <div class="stat-item stat-streak" id="stat-streak-btn" title="Ofensiva diária de estudo">
+            <span class="streak-flame">🔥</span>
+            <span id="streak-count">1</span>
+          </div>
+
+          <!-- Gems -->
+          <div class="stat-item stat-gems" id="stat-gems-btn" title="Cristais do Cerrado">
+            <span>💎</span>
+            <span id="gems-count">50</span>
+          </div>
+
+          <!-- Hearts -->
+          <div class="stat-item stat-hearts" id="stat-hearts-btn" title="Vidas disponíveis">
+            <span id="heart-icon">❤️</span>
+            <span id="hearts-count">5</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Views -->
+      <main class="view-container" id="main-views">
+        
+        <!-- View 1: Trilha de Aprendizado (Path) -->
+        <section class="trail-view" id="view-trail">
+          <!-- Dynamic Units & Lessons Injected by JavaScript -->
+        </section>
+
+        <!-- View 2: Dicionário & Cultura -->
+        <section class="dict-view" id="view-dictionary" style="display: none;">
+          <div class="dict-header">
+            <h1>Dicionário A'uwẽ</h1>
+            <p>Guia bilíngue Xavante ↔ Português com fonética e notas culturais 100% offline.</p>
+          </div>
+
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="dict-search-input" placeholder="Buscar palavra ou tradução..." autocomplete="off" />
+          </div>
+
+          <div class="category-chips" id="dict-category-chips">
+            <!-- Injected by JS -->
+          </div>
+
+          <div class="dict-list" id="dict-cards-list">
+            <!-- Injected by JS -->
+          </div>
+        </section>
+
+        <!-- View 3: Prática Rápida (Recuperar Vidas) -->
+        <section class="practice-view" id="view-practice" style="display: none;">
+          <div class="practice-card">
+            <div class="practice-icon">⚡</div>
+            <h2 style="font-size: 22px; font-weight: 900; color: #1F2937;">Treino do Guerreiro</h2>
+            <p style="font-size: 14px; color: #4B5563; line-height: 1.4;">
+              Pratique palavras aprendidas para recarregar seus corações e ganhar +15 XP!
+            </p>
+            <button class="btn-action-3d btn-primary-check" id="btn-start-practice" style="margin-top: 10px;">
+              Iniciar Treino (+1 ❤️)
+            </button>
+          </div>
+
+          <div class="practice-card" style="background: #FFFBEB; border-color: #FDE68A;">
+            <div style="font-size: 36px;">📖</div>
+            <h3 style="font-size: 17px; font-weight: 800; color: #92400E;">Guia Fonético A'uwẽ</h3>
+            <p style="font-size: 13px; color: #78350F; text-align: left; line-height: 1.4;">
+              • <strong>' (Apóstrofo / Saltillo):</strong> Pausa glotal na garganta (ex: <em>Pi'õ</em>, <em>Datsa'a</em>).<br/>
+              • <strong>ã, õ, ẽ:</strong> Vogais nasais fortes.<br/>
+              • <strong>dz / z:</strong> Som africado ou fricativo suave.<br/>
+              • <strong>ö:</strong> Vogal fechada emitida com lábios relaxados.
+            </p>
+          </div>
+        </section>
+
+        <!-- View 4: Perfil & Conquistas -->
+        <section class="profile-view" id="view-profile" style="display: none;">
+          <div class="profile-card">
+            <img src="/assets/mascot.jpg" alt="Perfil" class="profile-avatar" />
+            <div class="profile-info">
+              <h2>Estudante A'uwẽ</h2>
+              <p>Aprendiz da Trilha Xavante</p>
+              <div class="offline-chip" style="margin-top: 6px;">
+                <span>🟢</span> Modo Offline Ativo
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-box-icon">⚡</span>
+              <div>
+                <div class="stat-box-val" id="profile-xp-val">0</div>
+                <div class="stat-box-lbl">XP Total</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-box-icon">🔥</span>
+              <div>
+                <div class="stat-box-val" id="profile-streak-val">1</div>
+                <div class="stat-box-lbl">Ofensiva (Dias)</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-box-icon">⭐</span>
+              <div>
+                <div class="stat-box-val" id="profile-stars-val">0</div>
+                <div class="stat-box-lbl">Estrelas</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-box-icon">🏆</span>
+              <div>
+                <div class="stat-box-val" id="profile-badges-val">0</div>
+                <div class="stat-box-lbl">Conquistas</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="achievements-section">
+            <h3>Conquistas Desbloqueáveis</h3>
+            <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Sound & Reset Settings -->
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-action-3d" id="btn-toggle-sound" style="flex: 1; background: #E5E7EB; color: #374151; box-shadow: 0 4px 0 #CBD5E1; font-size: 13px;">
+              🔊 Som: Ligado
+            </button>
+            <button class="btn-action-3d" id="btn-reset-data" style="flex: 1; background: #FEE2E2; color: #DC2626; box-shadow: 0 4px 0 #FCA5A5; font-size: 13px;">
+              🔄 Reiniciar
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Navigation Bar -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" id="nav-btn-trail" data-view="trail">
+          <span class="nav-item-icon">🗺️</span>
+          <span class="nav-item-label">Aprender</span>
+        </button>
+
+        <button class="nav-item" id="nav-btn-dictionary" data-view="dictionary">
+          <span class="nav-item-icon">📖</span>
+          <span class="nav-item-label">Dicionário</span>
+        </button>
+
+        <button class="nav-item" id="nav-btn-practice" data-view="practice">
+          <span class="nav-item-icon">⚡</span>
+          <span class="nav-item-label">Praticar</span>
+        </button>
+
+        <button class="nav-item" id="nav-btn-profile" data-view="profile">
+          <span class="nav-item-icon">🏆</span>
+          <span class="nav-item-label">Perfil</span>
+        </button>
+      </nav>
+
+      <!-- Lesson Modal (Full-screen Interactive Flow) -->
+      <div class="lesson-modal" id="lesson-modal">
+        <!-- Top lesson bar with close & progress -->
+        <div class="lesson-top-bar">
+          <button class="btn-close-lesson" id="btn-exit-lesson" title="Sair da lição">✕</button>
+          <div class="progress-track">
+            <div class="progress-fill" id="lesson-progress-fill"></div>
+          </div>
+          <div class="stat-item stat-hearts" style="margin-left: 8px;">
+            <span>❤️</span>
+            <span id="lesson-hearts-val">5</span>
+          </div>
+        </div>
+
+        <!-- Exercise Content Container -->
+        <div class="lesson-content" id="lesson-exercise-area">
+          <!-- Dynamically filled by lessonEngine.js -->
+        </div>
+
+        <!-- Victory Screen Inside Modal -->
+        <div class="victory-screen" id="victory-screen">
+          <img src="/assets/mascot.jpg" alt="Tsere Feliz" class="victory-mascot" />
+          <h2 class="victory-title">Tô Uptabi! Parabéns!</h2>
+          <p style="font-size: 15px; color: #4B5563; font-weight: 600;">
+            Você completou a lição e fortaleceu seus conhecimentos na língua Xavante!
+          </p>
+
+          <div class="victory-stats-row">
+            <div class="victory-stat-card">
+              <span class="victory-stat-val" id="victory-xp-gained">+20</span>
+              <span class="victory-stat-lbl">XP Ganho</span>
+            </div>
+            <div class="victory-stat-card">
+              <span class="victory-stat-val" id="victory-accuracy">100%</span>
+              <span class="victory-stat-lbl">Precisão</span>
+            </div>
+          </div>
+
+          <button class="btn-action-3d btn-continue-success" id="btn-victory-finish" style="max-width: 320px;">
+            Continuar
+          </button>
+        </div>
+
+        <!-- Bottom Feedback Sheet -->
+        <div class="lesson-footer" id="lesson-footer">
+          <div class="feedback-banner" id="feedback-banner">
+            <div class="feedback-icon" id="feedback-icon">🎉</div>
+            <div class="feedback-text">
+              <h4 id="feedback-title">Muito bem!</h4>
+              <p id="feedback-desc">Tradução correta!</p>
+            </div>
+          </div>
+
+          <button class="btn-action-3d btn-primary-check" id="btn-check-answer" disabled>
+            Verificar
+          </button>
+        </div>
+      </div>
+
+      <!-- Confetti Canvas -->
+      <canvas id="confetti-canvas"></canvas>
+
+    </div>
+
+    <!-- Application Script Entry -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

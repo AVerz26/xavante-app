@@ -1,0 +1,78 @@
+name: Build & Release Android APK (Aprenda Xavante)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Compilar e Publicar APK Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependências e Gerar Web Assets
+        run: |
+          npm ci || npm install
+          npm run build
+          npx cap sync android
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Dar permissão de execução ao gradlew
+        run: chmod +x android/gradlew
+
+      - name: Compilar APK Debug
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+          cd ..
+          cp android/app/build/outputs/apk/debug/app-debug.apk AprendaXavante.apk
+
+      - name: Salvar APK nos Artefatos do GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: AprendaXavante-apk
+          path: AprendaXavante.apk
+          retention-days: 30
+
+      - name: Publicar Link Direto no GitHub Releases (Download Público)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "A'uwẽ - Aprenda Xavante (Download do APK)"
+          body: |
+            ### 🦅 A'uwẽ - Aprenda Xavante (Aplicativo Android 100% Offline)
+            
+            O aplicativo estilo Duolingo para aprender palavras, frases, pronúncias e a cultura da língua indígena Xavante já está pronto para instalação no seu celular!
+            
+            #### 📱 Como instalar no celular:
+            1. Baixe o arquivo **`AprendaXavante.apk`** abaixo.
+            2. Toque no arquivo baixado para instalar.
+            3. Se o Android pedir, permita a instalação de "fontes desconhecidas" para o seu navegador ou gerenciador de arquivos.
+            4. Abra o app e bons estudos! Funciona 100% offline sem internet.
+            
+            ---
+            *Compilado automaticamente via GitHub Actions.*
+          files: AprendaXavante.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
