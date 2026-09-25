@@ -245,6 +245,8 @@ function renderTrail() {
 }
 
 // --- VIEW 2: DICIONÁRIO & CULTURA ---
+let dictDisplayLimit = 50;
+
 function setupDictionary() {
   // Category Chips
   el.dictCategoryChips.innerHTML = '';
@@ -255,6 +257,7 @@ function setupDictionary() {
     chip.addEventListener('click', () => {
       sounds.playTap();
       activeCategory = cat.id;
+      dictDisplayLimit = 50;
       document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       renderDictionary();
@@ -265,6 +268,7 @@ function setupDictionary() {
   // Search Input
   el.dictSearchInput.addEventListener('input', (e) => {
     searchTerm = e.target.value.toLowerCase().trim();
+    dictDisplayLimit = 50;
     renderDictionary();
   });
 }
@@ -292,14 +296,31 @@ function renderDictionary() {
     return;
   }
 
-  filtered.forEach(item => {
+  // Header com contador
+  const countBar = document.createElement('div');
+  countBar.style.display = 'flex';
+  countBar.style.justifyContent = 'space-between';
+  countBar.style.alignItems = 'center';
+  countBar.style.fontSize = '12px';
+  countBar.style.fontWeight = '700';
+  countBar.style.color = '#786C5E';
+  countBar.style.marginBottom = '6px';
+  countBar.innerHTML = `
+    <span>${filtered.length} palavras encontradas</span>
+    <span>Base Webonary / SIL</span>
+  `;
+  el.dictCardsList.appendChild(countBar);
+
+  const displayedItems = filtered.slice(0, dictDisplayLimit);
+
+  displayedItems.forEach(item => {
     const card = document.createElement('div');
     card.className = 'dict-card';
     card.innerHTML = `
       <div class="dict-card-top">
         <div>
           <div class="dict-xavante">${item.xavante}</div>
-          <div class="dict-phonetic">Pronúncia: ${item.phonetic}</div>
+          <div class="dict-phonetic">Pronúncia: ${item.phonetic} ${item.pos ? `• ${item.pos}` : ''}</div>
         </div>
         <div style="display: flex; gap: 6px;">
           <button class="dict-audio-btn btn-audio-normal" title="Ouvir pronúncia">🔊</button>
@@ -309,7 +330,7 @@ function renderDictionary() {
       <div class="dict-portuguese">${item.portuguese}</div>
       <div class="dict-example">${item.example}</div>
       <div style="font-size: 12px; color: #6B7280; line-height: 1.35; margin-top: 2px;">
-        💡 <strong>Cultura:</strong> ${item.note}
+        💡 <strong>Contexto:</strong> ${item.note}
       </div>
     `;
 
@@ -335,6 +356,24 @@ function renderDictionary() {
 
     el.dictCardsList.appendChild(card);
   });
+
+  // Botão "Carregar Mais" se houver mais itens
+  if (filtered.length > dictDisplayLimit) {
+    const moreBtn = document.createElement('button');
+    moreBtn.className = 'btn-action-3d';
+    moreBtn.style.background = '#FFFFFF';
+    moreBtn.style.color = '#8C2210';
+    moreBtn.style.borderColor = '#E2D8CC';
+    moreBtn.style.marginTop = '10px';
+    moreBtn.style.boxShadow = '0 4px 0 #D5C9BA';
+    moreBtn.textContent = `Carregar mais 50 palavras (${displayedItems.length} de ${filtered.length})`;
+    moreBtn.addEventListener('click', () => {
+      sounds.playTap();
+      dictDisplayLimit += 50;
+      renderDictionary();
+    });
+    el.dictCardsList.appendChild(moreBtn);
+  }
 }
 
 // --- VIEW 3: PRÁTICA RÁPIDA (RECARREGAR CORAÇÕES) ---
